@@ -1,0 +1,104 @@
+
+<link href="datatables.min.css" rel="stylesheet" />
+<style>
+    td.details-control {
+        background: url('@Url.Content("~/Images/DataTable/details_open.png")') no-repeat center center;
+        cursor: pointer;
+    }
+
+    tr.shown td.details-control {
+        background: url('@Url.Content("~/Images/DataTable/details_close.png")') no-repeat center center;
+    }
+
+    .icon-1 {
+        background: transparent url(Images/someimage.png)) scroll no-repeat left center;
+        padding: 2px 0 4px 23px;
+        line-height: 25px;
+    }
+
+    .icon-2 {
+        background: transparent url(Images/someother.png) scroll no-repeat left center;
+        padding: 2px 0 4px 23px;
+        line-height: 25px;
+    }
+    .link{
+        margin-left:75px;
+    }
+</style>
+<div class="row" style="margin-top:30px">
+    <div id="parentDiv" style="width:90%; margin:0 auto; display:none">
+        <table id="dttable" class="table table-striped table-bordered">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>Agent Name</th>
+                </tr>
+<thead>
+        </table>
+    </div>
+</div>
+
+<script src="jquery.min.js"></script>
+<script src="datatables.min.js"></script>
+
+ $(document).ready(function () {
+
+            $("#btnView").click(function () {
+                
+                $("#parentDiv").show();
+                $('#rptTable').DataTable().destroy();
+                $('#dttable tbody').empty()
+
+                $('#dttable').DataTable({
+                    'processing': false, // for show progress bar
+                    'serverSide': true, // for process server side
+                    'filter': false, // this is for disable filter (search box)
+                    'order': [],
+                    'ajax': {
+                        'url': 'someurl/someaction',
+                        'type': 'POST',
+                        'datatype': 'json',
+                        'data': {
+                            'name': $('#dataToPass').val(),
+                        }
+                    },
+                    'columns': [
+                        {
+                            'className': 'details-control',
+                            'orderable': false,
+                            'data': null,
+                            'defaultContent': '',
+                            'width': '40px'
+                        },
+                        { 'data': 'agentName' },
+                    ],
+                });
+
+
+                // Add event listener for opening and closing details
+                $('#rptTable tbody').off('click').on('click', 'td.details-control', function (e) {
+                    var tr = $(this).closest('tr');
+                    var row = $('#dttable').DataTable().row(tr);
+
+                    if (row.child.isShown()) {
+                        // This row is already open - close it
+                        row.child.hide();
+                        tr.removeClass('shown');
+                    } else {
+                        // Open this row
+                        row.child(format(row.data())).show();
+                        tr.addClass('shown');
+                    }
+                });
+
+
+                /* Formatting function for row details - modify as you need */
+                function format(rowdata) {
+
+                    return `<div class='link'><a class='icon-1' style='cursor:hand' href='${rowdata.someurl}' target="_blank">Show</a></div>
+                    <div class='link''><a class='icon-2' style='cursor:hand' href='javascript: void(0);' onclick="somefunction(${rowdata.Id})">Some Other data</a></div>`
+                }
+            })
+       
+
+    });
